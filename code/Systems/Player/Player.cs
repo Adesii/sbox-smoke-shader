@@ -128,8 +128,9 @@ public partial class Player : AnimatedEntity
 			if ( Input.Pressed( "attack1" ) && Game.IsServer )
 				_ = new CSSmoke()
 				{
-					SmokePosition = tr.EndPosition,
+					Position = tr.EndPosition + Vector3.Up * 64f,
 				};
+			//DebugOverlay.TraceResult( tr );
 			/* if ( Input.Pressed( "attack2" ) )
 				SmokeManager.AddSmokeVoxel( tr.HitPosition ); */
 		}

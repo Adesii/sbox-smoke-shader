@@ -4,19 +4,21 @@ namespace Sandbox.Systems.Smoke;
 
 public class RenderHookSmoke : RenderHook
 {
-
+	public static SceneWorld SmokeWorld { get; set; } = new();
 	public override void OnStage( SceneCamera target, Stage renderStage )
 	{
 
 		if ( renderStage != Stage.BeforePostProcess ) return;
 		Graphics.Clear( true, false );
 		var ents = Entity.All.OfType<SmokeInstance>();
-		Graphics.GrabDepthTexture( "DepthBuffer" );
 
 		foreach ( var smoke in ents.OrderByDescending( x => x.Position.Distance( target.Position ) ) )
 		{
-			Graphics.SetupLighting( smoke.so );
-			Graphics.Render( smoke.so, null, null, SmokeInstance.smokematerial );
+			Graphics.GrabDepthTexture( "DepthBuffer", smoke.so.Attributes );
+			Graphics.SetupLighting( smoke.so, smoke.so.Attributes );
+			smoke.SetGraphicsParameters();
+			smoke.so.RenderSceneObject();
+			//Graphics.Render( smoke.so, smoke.Transform );
 		}
 	}
 
