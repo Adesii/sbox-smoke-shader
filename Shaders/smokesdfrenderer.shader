@@ -104,9 +104,13 @@ PS
 	float g_flVolumeDensity < Default( 1.0f ); Range(0.0f, 1.0f); UiGroup( "Cloud,10/11" ); >;
 	float g_flShadowDensity < Default( 0.1f ); Range(0.0f, 2.0f); UiGroup( "Cloud,10/12" ); >;
 	float g_flNoiseStrenght < Default( 0.1f ); Range(0.0f, 20.0f); UiGroup( "Cloud,10/12" ); >;
+
 	float g_flNoiseSize < Default( 30.0f ); Range(0.0f, 100.0f); UiGroup( "Cloud,10/12" ); >;
 	float g_flNoiseSpeed < Default( 0.5f ); Range(0.0f, 20.0f); UiGroup( "Cloud,10/12" ); >;
 
+	float g_flPositionNoiseSize < Default( 30.0f ); Range(0.0f, 100.0f); UiGroup( "Cloud,10/12" ); >;
+	float g_flPositionNoiseSpeed < Default( 0.5f ); Range(0.0f, 20.0f); UiGroup( "Cloud,10/12" ); >;
+	float g_flPositionNoiseStrenght < Default( 0.5f ); Range(0.0f, 20.0f); UiGroup( "Cloud,10/12" ); >;
 
 	int g_nMaxLightSteps < Default( 8 ); Range(1, 16); UiGroup( "Cloud,10/9" ); >;
 	float g_flLightStepSize < Default( 4.0f ); Range(0.1f, 128.0f); UiGroup( "Cloud,10/10" ); >;
@@ -129,6 +133,11 @@ PS
 	float SampleDensity( float3 vPosWs )
 	{
 		vPosWs += g_vWorldPosition;
+		//offset position by noise
+		vPosWs += float3(
+			snoise(((vPosWs+5)/g_flPositionNoiseSize) + g_flTime*g_flPositionNoiseSpeed),
+			snoise(((vPosWs+1100)/g_flPositionNoiseSize) + g_flTime*g_flPositionNoiseSpeed),
+			snoise(((vPosWs-500)/g_flPositionNoiseSize) + g_flTime*g_flPositionNoiseSpeed))*g_flPositionNoiseStrenght;
 		uint nEllipsesStart = shapeInstances.nStartEllipsoid;
 		uint nBoxesStart = shapeInstances.nEndEllipsoid;
 		uint nCylinderStart = shapeInstances.nEndBox;
@@ -336,32 +345,20 @@ PS
 				break;
 			float currentsample = SampleDensity(vRayCurrentPos);
 
-			/* if(currentsample > 0.001) */
+			if(currentsample > 0.001)
 			{
 			
 
 				float3 lightPos = vRayCurrentPos;
-				float shadow = 0;
-				[loop]
-				for(int lightstep = 0; lightstep < g_nMaxLightSteps; lightstep++)
-				{
-					lightPos += g_vSunLightDir;
-					shadow += SampleDensity(lightPos);
-					if(shadow > shadowCutoffThreshold)
-						break;
-				}
+				
 
 				float density = saturate(currentsample * g_flVolumeDensity);
-
-				float shadowTerm = exp(-shadow * g_flShadowDensity);
-
-				float3 absorbedLight = shadowTerm * density;
 
 				transmittance *= 1.0 - density;
 				luminance = Direct(i,m,lightPos,vRayDir,length(lightPos - vRayOrigin));
 
 
-				if(transmittance < 0.1)
+				if(transmittance < 0.01)
 					break;
 			}
 			vRayCurrentPos += vRayDir;
