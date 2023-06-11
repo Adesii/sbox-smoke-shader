@@ -315,16 +315,6 @@ PS
 		return color.rgb;
 	}
 
-
-	bool DepthTest(float3 testpos,float2 screenpos){
-		float fDepth = GetDepth( screenpos );
-		fDepth = RemapValClamped( fDepth, g_flViewportMinZ, g_flViewportMaxZ, 0.0, 1.0 );
-
-		float4 vPosPs = Position3WsToPs( testpos );
-		float fDepthObj = vPosPs.z / vPosPs.w;
-
-		return fDepth > fDepthObj;
-	}
 	//
 	// Main
 	//
@@ -381,8 +371,17 @@ PS
 		[loop]
 		for(int step = 0; step < g_nMaxStepCount; step++)
 		{
-			if(length(g_vCameraPositionWs-vRayCurrentPos) > depthcutoff)
+			float fDepth = GetDepth( vScreenPos );
+
+			float4 vPosPs = Position3WsToPs( vRayCurrentPos );
+			float fDepthObj = vPosPs.z / vPosPs.w;
+
+			float flZScale = g_vInvProjRow3.z;
+			float flZTran = g_vInvProjRow3.w;
+			float flDepthRelativeToRayLength = 1.0 / ( ( fDepthObj * flZScale + flZTran ) );
+			if(fDepth < flDepthRelativeToRayLength){
 				break;
+			}
 			float currentsample = SampleDensity(vRayCurrentPos);
 
 			if(currentsample > 0.001)

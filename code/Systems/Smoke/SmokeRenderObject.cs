@@ -15,6 +15,7 @@ public class SmokeRenderObject : SceneCustomObject
 		SmokeParent = parent;
 		Update();
 		RenderLayer = SceneRenderLayer.OverlayWithDepth;
+		Tags.Add( "smoke" );
 	}
 
 	public virtual void Update()
