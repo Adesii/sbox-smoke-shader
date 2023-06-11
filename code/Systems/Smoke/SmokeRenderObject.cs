@@ -29,7 +29,15 @@ public class SmokeRenderObject : SceneCustomObject
 			vb.Init( true );
 		}
 		vb.Clear();
-		vb.AddCube( SmokeParent.SmokeSDFBounds.Center, SmokeParent.SmokeSDFBounds.Size, Rotation );
+		if ( SmokeParent.SmokeSDFBounds.Contains( Camera.Position ) )
+		{
+			vb.AddCube( Camera.Position, -10f, Camera.Rotation );
+		}
+		else
+		{
+			vb.AddCube( SmokeParent.SmokeSDFBounds.Center, SmokeParent.SmokeSDFBounds.Size, Rotation );
+		}
+
 	}
 
 	public override void RenderSceneObject()

@@ -78,7 +78,9 @@ public struct ShapeConstantBuffer_tss
 	//public ShapeSettings_t shapeSettings;
 
 	public ShapeInstance_ts shapeInstance;
+	public ShapeInstance_ts shapeSubInstance;
 
 	//public List<ShapeBounds_ts> shapeBounds;
 	public List<ShapeProperties_ts> shapePropertiesss;
+	public List<ShapeProperties_ts> shapeSubPropertiesss;
 }

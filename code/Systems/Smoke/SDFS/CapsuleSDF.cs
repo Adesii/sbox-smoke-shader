@@ -17,6 +17,19 @@ public class CapsuleSDF : SmokeSDF
 		Type = SDFType.Ellipsoid;
 	}
 
+	public CapsuleSDF( Vector3 Start, Vector3 End, float radius, float pow = 1f )
+	{
+		//Rotate the capsule to face the end point
+		Position = Start;
+		Length = (End - Start).Length;
+		Radius = radius;
+		Pow = pow;
+
+		Type = SDFType.Ellipsoid;
+
+		Rotation = Rotation.LookAt( End - Start );
+	}
+
 	public override ShapeProperties_ts Encode( SmokeInstance smokeInstance )
 	{
 		return new ShapeProperties_ts

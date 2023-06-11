@@ -89,11 +89,18 @@ PS
 		ShapeInstance_ts shapeInstances;
 	};
 
+	cbuffer subtractionInstancesConstantbuffer{
+		ShapeInstance_ts subtractionshapeInstances;
+	};
+
+	#define SHAPE_MAX_SHAPESs 110
 	cbuffer ShapeConstantBuffer_tss
 	{
-		#define SHAPE_MAX_SHAPESs 110
 		ShapeProperties_ts shapePropertiess[SHAPE_MAX_SHAPESs];
-		
+	};
+
+	cbuffer subtractionConstantbuffer_tss{
+		ShapeProperties_ts shapeSubPropertiess[SHAPE_MAX_SHAPESs];
 	};
 
 	float g_flStepSize < Default( 8.0f ); Range(1.0f, 256.0f); UiGroup( "Cloud,10/4" ); >;
@@ -130,6 +137,7 @@ PS
 	static float MAX_DIST = 1000.0f;
 	static float EPSILON = 0.0001f;
 
+
 	float SampleDensity( float3 vPosWs )
 	{
 		vPosWs += g_vWorldPosition;
@@ -142,6 +150,11 @@ PS
 		uint nBoxesStart = shapeInstances.nEndEllipsoid;
 		uint nCylinderStart = shapeInstances.nEndBox;
 		uint nCylinderEnd = shapeInstances.nEndCylinder;
+
+		uint nSubEllipsesStart = subtractionshapeInstances.nStartEllipsoid;
+		uint nSubBoxesStart = subtractionshapeInstances.nEndEllipsoid;
+		uint nSubCylinderStart = subtractionshapeInstances.nEndBox;
+		uint nSubCylinderEnd = subtractionshapeInstances.nEndCylinder;
 
 		/* float res = 0;
 		// Then boxes
@@ -175,9 +188,36 @@ PS
 			res = max( res,((pow(1-  sdCylinder( p,  shapePropertiess[i].vProxyScale.y,  shapePropertiess[i].vProxyScale.x ),0.5f ))*shapePropertiess[i].flPower) );
 		}
 
-
 		float snose = snoise((vPosWs/g_flNoiseSize) + g_flTime*g_flNoiseSpeed);
-		res *= (snose*0.5f + 0.5f)*g_flNoiseStrenght;
+		res = min(res,(snose*0.5f + 0.5f)*g_flNoiseStrenght);
+
+		// do the subtraction sdfs now
+		//Ellipses first
+		for ( i = 0; i < nSubBoxesStart; i++ )
+		{
+			const float fRadius = shapeSubPropertiess[i].vProxyScale.y;
+			const float3 fLength = float3( shapeSubPropertiess[i].vProxyScale.x,0,0);
+			float3 p = mul( float4( vPosWs.xyz, 1.0 ), shapeSubPropertiess[i].matWorldToProxy ).xyz;
+					
+			res = min( res, ((pow(1- sdCapsule( p, -fLength, fLength, fRadius ),0.5f ))*shapeSubPropertiess[i].flPower) );
+		}
+		// Then boxes
+		for ( i = nSubBoxesStart; i < nSubCylinderStart; i++ )
+		{
+			float3 p = mul( float4(vPosWs.xyz,1.0f),shapeSubPropertiess[i].matWorldToProxy ).xyz;
+			res = min( res,((pow(1- sdBox( p, shapeSubPropertiess[i].vProxyScale ),0.5f ))*shapeSubPropertiess[i].flPower));
+		}
+		// Then Cylinder
+		for ( i = nSubCylinderStart; i < nSubCylinderEnd; i++ )
+		{
+			float3 p = mul( float4( vPosWs.xyz, 1.0 ), shapeSubPropertiess[i].matWorldToProxy ).zxy;
+			res = min( res,((pow(1-  sdCylinder( p,  shapeSubPropertiess[i].vProxyScale.y,  shapeSubPropertiess[i].vProxyScale.x ),0.5f ))*shapeSubPropertiess[i].flPower) );
+		}
+
+		
+
+
+		
 		return res;
 	}
 
@@ -364,7 +404,7 @@ PS
 			vRayCurrentPos += vRayDir;
 		}
 
-
+		luminance *= g_vExtinctionColor;
 
 		return float4(luminance.xyz,(1-transmittance));
 	}

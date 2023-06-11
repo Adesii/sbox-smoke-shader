@@ -102,6 +102,8 @@ public partial class Player : AnimatedEntity
 		PlayerCamera = new PlayerCamera();
 	}
 
+	TimeSince LastSHot = 0f;
+
 	/// <summary>
 	/// Called every server and client tick.
 	/// </summary>
@@ -128,11 +130,33 @@ public partial class Player : AnimatedEntity
 			if ( Input.Pressed( "attack1" ) && Game.IsServer )
 				_ = new CSSmoke()
 				{
-					Position = tr.EndPosition + Vector3.Up * 64f,
+					Position = tr.EndPosition/*  + Vector3.Up * 64f */,
 				};
+
 			//DebugOverlay.TraceResult( tr );
 			/* if ( Input.Pressed( "attack2" ) )
 				SmokeManager.AddSmokeVoxel( tr.HitPosition ); */
+		}
+
+		if ( Input.Down( "MiddleMouse" ) && Game.IsClient && LastSHot > 0.05f )
+		{
+			var bullettrace = Trace.Ray( EyePosition, EyePosition + EyeRotation.Forward * 5000 )
+				.Ignore( this )
+				.WithTag( "smoke" )
+				.RunAll();
+
+			if ( bullettrace == null ) return;
+
+
+			foreach ( var trace in bullettrace )
+			{
+				if ( trace.Hit && trace.Entity is CSSmoke smoke )
+				{
+					smoke.AddBulletHole( trace );
+				}
+			}
+			LastSHot = 0f;
+
 		}
 
 	}
