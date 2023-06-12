@@ -16,7 +16,7 @@ public class SphereSDF : SmokeSDF
 		Type = SDFType.Ellipsoid;
 	}
 
-	public override ShapeProperties_ts Encode( SmokeInstance smokeInstance )
+	public override ShapeProperties_ts Encode( SmokeRenderObject smokeInstance )
 	{
 		return new ShapeProperties_ts
 		{
@@ -26,7 +26,7 @@ public class SphereSDF : SmokeSDF
 		};
 	}
 
-	public override BBox GetBounds( SmokeInstance instance )
+	public override BBox GetBounds( SmokeRenderObject instance )
 	{
 		return new BBox( Position - Radius, Position + Radius );
 	}

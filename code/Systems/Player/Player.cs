@@ -152,7 +152,8 @@ public partial class Player : AnimatedEntity
 			{
 				if ( trace.Hit && trace.Entity is CSSmoke smoke )
 				{
-					smoke.AddBulletHole( trace );
+					smoke.AddBulletHole( trace, EyeRotation.Forward );
+					break;
 				}
 			}
 			LastSHot = 0f;

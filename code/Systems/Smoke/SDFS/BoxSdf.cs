@@ -22,7 +22,7 @@ public class BoxSDF : SmokeSDF
 		return SDFHelper.BoxSDF( pos - Position, Size );
 	}
 
-	public override ShapeProperties_ts Encode( SmokeInstance instance )
+	public override ShapeProperties_ts Encode( SmokeRenderObject instance )
 	{
 		ShapeProperties_ts props = new();
 		props.matWorldProxy = GetMatrix( instance );
@@ -31,7 +31,7 @@ public class BoxSDF : SmokeSDF
 		return props;
 	}
 
-	public Matrix GetMatrix( SmokeInstance instance )
+	public Matrix GetMatrix( SmokeRenderObject instance )
 	{
 		return Matrix.CreateRotation( Rotation ) * Matrix.CreateTranslation( instance.Position - Position ).Transpose();
 	}
@@ -41,7 +41,7 @@ public class BoxSDF : SmokeSDF
 		return $"BoxSDF: {Position}, {Size}";
 	}
 
-	public override BBox GetBounds( SmokeInstance instance )
+	public override BBox GetBounds( SmokeRenderObject instance )
 	{
 		Matrix mat = GetMatrix( instance );
 		BBox box = new();

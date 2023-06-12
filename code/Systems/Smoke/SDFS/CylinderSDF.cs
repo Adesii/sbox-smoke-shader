@@ -18,7 +18,7 @@ public class CylinderSDF : SmokeSDF
 		Type = SDFType.Cylinder;
 	}
 
-	public override ShapeProperties_ts Encode( SmokeInstance smokeInstance )
+	public override ShapeProperties_ts Encode( SmokeRenderObject smokeInstance )
 	{
 		return new ShapeProperties_ts
 		{
@@ -28,7 +28,7 @@ public class CylinderSDF : SmokeSDF
 		};
 	}
 
-	public override BBox GetBounds( SmokeInstance instance )
+	public override BBox GetBounds( SmokeRenderObject instance )
 	{
 		return new BBox( Position - (Radius + Length), Position + (Radius + Length) );
 	}

@@ -14,8 +14,9 @@ public partial class SmokeInstance : ModelEntity
 
 	public BBox SmokeSDFBounds = new BBox( new Vector3( -1, -1, -1 ), new Vector3( 1, 1, 1 ) );
 
-	public List<SmokeSDF> SmokeSDFs = new();
-	public List<SmokeSDF> SubtractionSmokeSDFs = new();
+	public static List<SmokeSDF> SmokeSDFs = new();
+	public List<SmokeSDF> InstanceSmokeSDFs = new();
+	public static List<SmokeSDF> SubtractionSmokeSDFs = new();
 
 
 	public override void Spawn()
@@ -103,9 +104,9 @@ public partial class SmokeInstance : ModelEntity
 
 		//update smokebounds to fit all the sdfs
 		SmokeSDFBounds = new BBox( Position, 0 );
-		foreach ( var sdf in SmokeSDFs )
+		foreach ( var sdf in InstanceSmokeSDFs )
 		{
-			BBox sdfbox = sdf.GetBounds( this );
+			BBox sdfbox = sdf.GetBounds( so );
 			SmokeSDFBounds = SmokeSDFBounds.AddBBox( sdfbox );
 			//SmokeSDFBounds = SmokeSDFBounds.AddPoint( sdfbox.Maxs );
 			//DebugOverlay.Box( sdfbox.Mins, sdfbox.Maxs, Color.Green );
@@ -143,13 +144,13 @@ public partial class SmokeInstance : ModelEntity
 			so = new( new(), this );
 		}
 		so.Batchable = false;
-		so.Update();
+		//so.Update();
 		//so.Flags.NeedsLightProbe = true;
 
 		//_boundsBuffer.Draw( smokematerial, attributes );
 	}
 
-	public void SetGraphicsParameters()
+	public static void SetGraphicsParameters( SmokeRenderObject idk )
 	{
 		ShapeConstantBuffer_tss scb = new();
 		scb.shapePropertiesss = new( 110 );
@@ -172,6 +173,11 @@ public partial class SmokeInstance : ModelEntity
 
 
 		var sorted = SmokeSDFs.OrderBy( x => x.Type ).ToList();
+		//make sure sorted is under the 110 element limit
+		if ( sorted.Count > 110 )
+		{
+			sorted.RemoveRange( 110, sorted.Count - 110 );
+		}
 
 		for ( int i = 0; i < sorted.Count; i++ )
 		{
@@ -192,10 +198,14 @@ public partial class SmokeInstance : ModelEntity
 				nEndCylinder++;
 			}
 			//Log.Info( sdf.ToString() );
-			scb.shapePropertiesss.Add( sdf.Encode( this ) );
+			scb.shapePropertiesss.Add( sdf.Encode( idk ) );
 		}
 
 		var sortedsubtraction = SubtractionSmokeSDFs.OrderBy( x => x.Type ).ToList();
+		if ( sortedsubtraction.Count > 110 )
+		{
+			sortedsubtraction.RemoveRange( 110, sortedsubtraction.Count - 110 );
+		}
 
 		for ( int i = 0; i < sortedsubtraction.Count; i++ )
 		{
@@ -216,7 +226,7 @@ public partial class SmokeInstance : ModelEntity
 				nSubEndCylinder++;
 			}
 			//Log.Info( sdf.ToString() );
-			scb.shapeSubPropertiesss.Add( sdf.Encode( this ) );
+			scb.shapeSubPropertiesss.Add( sdf.Encode( idk ) );
 		}
 		scb.shapeInstance = new()
 		{
@@ -234,11 +244,12 @@ public partial class SmokeInstance : ModelEntity
 			nEndCylinder = nSubEndCylinder,
 		};
 
-		so.Attributes.Set( "WorldPosition", 1 - so.Position );
-		so.Attributes.SetData( "ShapeInstancesConstantbuffer", scb.shapeInstance );
-		so.Attributes.SetData( "subtractionInstancesConstantbuffer", scb.shapeSubInstance );
-		so.Attributes.SetData( "ShapeConstantBuffer_tss", scb.shapePropertiesss );
-		so.Attributes.SetData( "subtractionConstantbuffer_tss", scb.shapeSubPropertiesss );
+
+		Graphics.Attributes.Set( "WorldPosition", 1 - idk.Position );
+		Graphics.Attributes.SetData( "ShapeInstancesConstantbuffer", scb.shapeInstance );
+		Graphics.Attributes.SetData( "subtractionInstancesConstantbuffer", scb.shapeSubInstance );
+		Graphics.Attributes.SetData( "ShapeConstantBuffer_tss", scb.shapePropertiesss );
+		Graphics.Attributes.SetData( "subtractionConstantbuffer_tss", scb.shapeSubPropertiesss );
 
 	}
 }

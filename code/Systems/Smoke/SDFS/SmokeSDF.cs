@@ -22,12 +22,12 @@ public class SmokeSDF
 		return 0;
 	}
 
-	public virtual ShapeProperties_ts Encode( SmokeInstance smokeInstance )
+	public virtual ShapeProperties_ts Encode( SmokeRenderObject smokeInstance )
 	{
 		return default;
 	}
 
-	public virtual BBox GetBounds( SmokeInstance instance )
+	public virtual BBox GetBounds( SmokeRenderObject instance )
 	{
 		return new BBox( Position - 1, Position + 1 );
 	}

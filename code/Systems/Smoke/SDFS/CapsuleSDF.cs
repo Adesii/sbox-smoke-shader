@@ -30,7 +30,7 @@ public class CapsuleSDF : SmokeSDF
 		Rotation = Rotation.LookAt( End - Start );
 	}
 
-	public override ShapeProperties_ts Encode( SmokeInstance smokeInstance )
+	public override ShapeProperties_ts Encode( SmokeRenderObject smokeInstance )
 	{
 		return new ShapeProperties_ts
 		{
@@ -40,7 +40,7 @@ public class CapsuleSDF : SmokeSDF
 		};
 	}
 
-	public override BBox GetBounds( SmokeInstance instance )
+	public override BBox GetBounds( SmokeRenderObject instance )
 	{
 		return new BBox( Position - (Radius + Length), Position + (Radius + Length) );
 	}

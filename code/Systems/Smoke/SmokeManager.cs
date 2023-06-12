@@ -40,6 +40,15 @@ public partial class SmokeManager : Entity
 		{
 			ent.Delete();
 		}
+		ClearSmokeClient();
+		SmokeInstance.SmokeSDFs.Clear();
+		SmokeInstance.SubtractionSmokeSDFs.Clear();
+	}
+	[ClientRpc]
+	public static void ClearSmokeClient()
+	{
+		SmokeInstance.SmokeSDFs.Clear();
+		SmokeInstance.SubtractionSmokeSDFs.Clear();
 	}
 
 
